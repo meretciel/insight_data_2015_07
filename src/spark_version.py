@@ -4,7 +4,7 @@ import time
 
 import subprocess
 from apprMedian import compute_approximate_rolling_median_from_list
-from calculateMedian import compute_rolling_median_from_list, compute_median_from_counters
+from calculateMedian import compute_rolling_median_from_list
 
 
 import sys
