@@ -15,15 +15,15 @@ The main purpose of this project is to implement two features mentioned in the p
 1.  Calculate the total number of times each word has been tweeted.
 2.  Calculate the median number of unique words per tweet, and update this median as tweets come in.
 
-There are difficulties here:
+There are two difficulties here:
 
 1.  The size of the input data is enormous. Tweeter claims that they generate 12GB text data per day.
 2.  We need an efficient algorithm to calculate the rolling median of streaming integers.
 
 
-For the first problem, we do not have many choices because at the end we still need to iterate through the whole input file at lease once. One possible solution is to split input files and follow the MapReduce programming model or we can use framework such as Spark directly.
+For the first problem, we do not have many choices because at the end we still need to iterate through the whole input file at lease once. One possible solution is to split input files and follow the MapReduce programming model or to use framework such as Spark directly.
 
-For the second problem, here are some thoughts. In a general context, it takes O(n) to compute the median of a unsorted array. However, as we know one tweet can only have 140 characters, hence 70 words at most. So our problem becomes how to compute the rolling median of streaming integers with known upper bound. If approximate results are acceptable, we can use P^2 algorithm do dynamically calculate the rolling median. Both of the algorithms have O(1) complexity.
+For the second problem, here are some thoughts. In a general context, it takes O(n) to compute the median of a unsorted array. However, as we know, one tweet can only have 140 characters, hence 70 words at most. So our problem becomes how to compute the rolling median of streaming integers with known upper bound. If approximate results are acceptable, we can use P^2 algorithm to dynamically calculate the rolling median. Both of the algorithms have O(1) complexity.
 
 
 ## Execution Environment
@@ -54,19 +54,19 @@ In this section, we will provide one straight forward solution to our problem. T
 To compute the word count, we will create a large dictionary. The key is the word and the value is the number of that word in the input files. Every time we read a word, if it is already in the dictionary, we increment the value by one, otherwise we add this new word to the dictionary and set the value equal to one.
 
 ##### Median Number of unique words per tweet
-To compute the rolling median, we will provide two different method. The first one will compute the exact median while the second one will calculate the approximate number.
+To compute the rolling median, we will provide two different methods. The first one is to compute the exact median and the second one is to calculate the approximate number.
 
 ###### First method  
 
-As we mentioned in the introduction, if we assume that there are at most 70 words per tweet, then the calculation of the median becomes much easier. The general idea is to create a kind of histogram of different number of words and then find the number that sits in the middle. Let counters denote the histogram, for example counters[10] is the number of tweets that has 10 words. To find the median, we just select the number N such that sum(counters[:N]) == 0.5 * total_number_of_tweets
+As we mentioned in the introduction, if we assume that there are at most 70 words per tweet, then the calculation of the median becomes much easier. The general idea is to create a kind of histogram of different number of words and then find the number that sits in the middle. Let counters denote the histogram, for example counters[10] is the number of tweets that has 10 words. To find the median, we can just select the number N such that sum(counters[:N]) == 0.5 * total_number_of_tweets
 
 
 ###### Second method  
 
-The second method we want to introduce is  [P2 algorithm] (http://pierrechainais.ec-lille.fr/Centrale/Option_DAD/IMPACT_files/Dynamic%20quantiles%20calcultation%20-%20P2%20Algorythm.pdf). This is a heuristic algorithm and will calculate the approximate median. The complexity of the algorithm is O(1) and it has a quite a good performance when the sample size is large. The figure below shows the performance of this algorithm.
+For the second method, what we want to introduce is  [P2 algorithm] (http://pierrechainais.ec-lille.fr/Centrale/Option_DAD/IMPACT_files/Dynamic%20quantiles%20calcultation%20-%20P2%20Algorythm.pdf). This is a heuristic algorithm and it will calculate the approximate median. The complexity of the algorithm is O(1) and it has a quite a good performance when the sample size is large. The figure below shows the performance of this algorithm.
 
 
-![]( ../images/approximate_median_1.png)
+![]( ./images/approximate_median_1.png)
 
 ###### Coparison
 
@@ -75,7 +75,7 @@ size 	|	first method		| second method
 8500	| 0.1301s				| 0.0852s
 20000  	| 0.2996s				| 0.1864s
 
-We would say P2 algorithm is quite efficient. However note that we can optimize the first method. Essentially, the first method calculates the exact 0.5-quantile for every new coming element. In order to optimize, we can memorize those values around 0.5-quantile and in that way we do not need re-calculate the 0.5-quantile every time.
+We would say P2 algorithm is quite efficient. However, note that we can optimize the first method. Essentially, the first method calculates the exact 0.5-quantile for every new coming element. In order to optimize, we can memorize those values around 0.5-quantile and in that way we do not need re-calculate the 0.5-quantile every time.
  
 
 
@@ -83,9 +83,9 @@ We would say P2 algorithm is quite efficient. However note that we can optimize 
 
 Here we use the line-by-line profiler to get a general idea of the performance. It takes 17% of time to read and process input file; 39% of time to do the word counts;  18% of time to compute the rolling median and 23% of time to write results to disk. 
 
-Note that except computing the rolling median, all other parts can be done in a parallel way and they make up 79% of processing time. This observation confirm us that a parallel framework is needed to solve this problem. 
+Note that except computing the rolling median, all other parts can be done in a parallel way and they make up 79% of processing time. This observation confirms that a parallel framework is needed to solve this problem. 
 
-Of course, we can manually create some parallel features with the help of multiprocessing module and collections module. In particular, we would be interested in `multiprocessing.Pool.map` and `collections.defaultdict`. However, we decide to use the Spark directly.
+Of course, we can manually create some parallel features with the help of multiprocessing module and collections module. In particular, we would be interested in `multiprocessing.Pool.map` and `collections.defaultdict`. However, we decide to use the Spark framework directly.
 
 
 ```
@@ -141,7 +141,7 @@ Line #      Hits         Time  Per Hit   % Time  Line Contents
 
 In this section, we will introduce how we solve the problem with the help of Spark. 
 
-As we mentioned previously, the problem can be divined into two sub-problem: word count problem and calculation of rolling median. For word count problem, the solution is straight forward. Following the MapReduce frame, we first split each tweet to individual words, then map each word to (word, 1) and finally reduce the paris by key. Translated into python code:
+As we mentioned previously, the problem can be divined into two sub-problems: word count problem and calculation of rolling median. For the word count problem, the solution is straight forward. Following the MapReduce frame, we first split each tweet to individual words, then map each word to (word, 1) and finally reduce the paris by key. Translated into python code:
 
 ```python
 _file = sc.textFile('../tweet_input/tweets.txt')
@@ -152,9 +152,9 @@ counts = _file.flatMap(lambda line: line.split(' ')) \
 
 ```
 
-To calculate the median number of unique words per tweet we need to first recored the number of unique words in each tweet. One way to to do that is to create a dictionary for each tweet, the key is the word and the value if the number of that word in the tweet and the number of the unique words is just the number of the keys in the dictionary. 
+To calculate the median number of unique words per tweet we need to first record the number of unique words in each tweet. One way to to do that is to create a dictionary for each tweet, the key is the word and the value is the number of that word in the tweet and the number of unique words is just the number of the keys in the dictionary. 
 
-We will store the number of unique words in the dictionary and RDD as well, the key for this item is a tuple named ('marked',).  With this setting, we can easily select the number of unique words from the RDD later on. Here is the code of the function convert_line_to_dict, it will take each line in tweets.txt as input and return (the times of) the dictionary mentioned above .
+We will store the number of unique words in the dictionary and RDD as well, the key for this item is a tuple named ('marked',). With this setting, we can easily select the number of unique words from the RDD later on. Here is the code of the function convert_line_to_dict, it will take each line in tweets.txt as input and return (the times of) the dictionary mentioned above .
 
 
 ```python
@@ -184,7 +184,7 @@ num_of_words = processed.filter(lambda _tuple: isinstance(_tuple[0], tuple))
 
 ##### Performance
 
-We tested the Spark standalone application on local machine with 4 cores (probably 1 master and 3 workers). We generate two sample input files of different size, one is 23M and the other is 1.6G. It turns out the the spark application runs much slower than the regular python program.  
+We tested the Spark standalone application on local machine with 4 cores (probably 1 master and 3 workers). We generate two sample input files of different size, one is 23M and the other is 1.6G. It turns out the spark application runs much slower than the regular python program.  
 
 Here are some thoughts of the performance issue:
 
@@ -193,7 +193,7 @@ Here are some thoughts of the performance issue:
 2. It seems that it takes a significant amount of time to process saveAsTextFile function. For example, when testing with 23M input file, if we do not save our results, it takes 23 seconds to run the program; however, if we call saveAsTestFile, it takes 42 seconds to finish the program.
 
 
-We tried different configurations on our local machine but there was no significant improvement of the performance. We need to test the program on the cluster for further discussion.
+We tried different configurations on our local machine but there was no significant improvement on the performance. We need to test the program on cluster for further discussion.
 
 
 
