@@ -9,13 +9,13 @@ from calculateMedian import compute_rolling_median_from_list
 
 import sys
 import os
-#os.environ['SPARK_HOME'] = '/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6'
-#os.environ['HADOOP_HOME'] = '/Users/Ruikun/Downloads/hadoop-2.7.0'
-#sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/')
-#sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python')
-#sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python/lib')
-#sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python/lib/py4j-0.8.2.1-src.zip')
-#sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python/spark')
+os.environ['SPARK_HOME'] = '/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6'
+os.environ['HADOOP_HOME'] = '/Users/Ruikun/Downloads/hadoop-2.7.0'
+sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/')
+sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python')
+sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python/lib')
+sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python/lib/py4j-0.8.2.1-src.zip')
+sys.path.append('/Users/Ruikun/Downloads/spark-1.4.0-bin-hadoop2.6/python/spark')
 
 
 
