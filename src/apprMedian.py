@@ -26,9 +26,11 @@ def apply_linear_formula(q, n, q_plus_1, n_plus_1, q_minus_1, n_minus_1, d):
 
 
 
-def compute_approximate_rolling_median_from_list(arr):
-    if len(arr) < 5:
+def compute_approximate_rolling_median_from_list(arr_in):
+    if len(arr_in) < 5:
         raise RuntimeError('Array should have at least 5 elements!')
+
+    arr = arr_in / float(_MAX_LENGTH)
 
     quantile = 0.5
 
@@ -124,7 +126,7 @@ if __name__ == '__main__':
 
     print 'apprMedian.py'
     start = time.time()
-    my_res = compute_approximate_rolling_median_from_list(arr / float(_MAX_LENGTH))
+    my_res = compute_approximate_rolling_median_from_list(arr)
     print time.time() - start
 
     # plot
